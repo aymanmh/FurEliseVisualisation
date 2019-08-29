@@ -1,0 +1,115 @@
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="Blocks">
+      <UniqueIdentifier>{F5FAB18D-B210-405A-A505-4F4D081F5F83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\Cairo">
+      <UniqueIdentifier>{0FD9FD30-97EC-4626-8EF2-ED49B8F39404}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\Cairo\src">
+      <UniqueIdentifier>{0DF4E1E3-34E2-417F-8188-AC3DD918ADAA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\Cairo\include">
+      <UniqueIdentifier>{2BB8BD67-7F96-4240-BA9E-E8BBA0002EFF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\Cairo\include\cinder">
+      <UniqueIdentifier>{CE7C21D9-6C9D-4218-A956-071189DD25E8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\Cairo\include\cinder\cairo">
+      <UniqueIdentifier>{805272C6-8D0B-4995-BB44-83E8716EAA06}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\Midi">
+      <UniqueIdentifier>{70be5b49-d3ab-43fc-b1c4-0fe77287e033}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\Midi\include">
+      <UniqueIdentifier>{4e925303-ea7a-4422-8dc6-8d4b835819bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\Midi\src">
+      <UniqueIdentifier>{ad8123cb-2261-410d-af3f-5dc4bc1d890d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\Midi\lib">
+      <UniqueIdentifier>{0036050a-4634-4b8d-9f89-19ff9dce3e77}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\CairoProjectApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\CairoProjectApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClInclude Include="..\include\Resources.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\..\cinder_0.9.1_vc2013\blocks\Cairo\src\Cairo.cpp">
+      <Filter>Blocks\Cairo\src</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\..\cinder_0.9.1_vc2013\blocks\Cairo\include\cinder\cairo\Cairo.h">
+      <Filter>Blocks\Cairo\include\cinder\cairo</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\..\cinder_0.9.1_vc2013\blocks\Cinder-MIDI2\lib\RtMidi.cpp">
+      <Filter>Blocks\Midi\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cinder_0.9.1_vc2013\blocks\Cinder-MIDI2\src\MidiHub.cpp">
+      <Filter>Blocks\Midi\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cinder_0.9.1_vc2013\blocks\Cinder-MIDI2\src\MidiIn.cpp">
+      <Filter>Blocks\Midi\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cinder_0.9.1_vc2013\blocks\Cinder-MIDI2\src\MidiMessage.cpp">
+      <Filter>Blocks\Midi\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\cinder_0.9.1_vc2013\blocks\Cinder-MIDI2\src\MidiOut.cpp">
+      <Filter>Blocks\Midi\src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\Resources.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\opensimplexnois.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\cinder_0.9.1_vc2013\blocks\Cinder-MIDI2\include\MidiConstants.h">
+      <Filter>Blocks\Midi\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\cinder_0.9.1_vc2013\blocks\Cinder-MIDI2\include\MidiExceptions.h">
+      <Filter>Blocks\Midi\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\cinder_0.9.1_vc2013\blocks\Cinder-MIDI2\include\MidiHeaders.h">
+      <Filter>Blocks\Midi\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\cinder_0.9.1_vc2013\blocks\Cinder-MIDI2\include\MidiHub.h">
+      <Filter>Blocks\Midi\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\cinder_0.9.1_vc2013\blocks\Cinder-MIDI2\include\MidiIn.h">
+      <Filter>Blocks\Midi\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\cinder_0.9.1_vc2013\blocks\Cinder-MIDI2\include\MidiMessage.h">
+      <Filter>Blocks\Midi\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\cinder_0.9.1_vc2013\blocks\Cinder-MIDI2\include\MidiOut.h">
+      <Filter>Blocks\Midi\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\cinder_0.9.1_vc2013\blocks\Cinder-MIDI2\lib\RtMidi.h">
+      <Filter>Blocks\Midi\lib</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resources.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
