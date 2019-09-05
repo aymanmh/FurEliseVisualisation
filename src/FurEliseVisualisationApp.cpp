@@ -20,71 +20,121 @@ using namespace ci;
 using namespace ci::app;
 using namespace std;
 
+
+class Petal
+{
+public:
+	Petal(float petalAngle, float radius_m, float petalOutsideRadius_m, float petalInsideRadius_m, Color color);
+	~Petal();
+	void draw(cairo::Context& ctx, vec2& orgLoc);
+	bool isDestroyed_m = false;
+private:
+	float petalAngle_m;
+	float angle1_m;
+	float angle2_m;
+	vec2 outsideCircleCenter_m;
+	vec2 insideCircleCenter_m;
+	vec2 direction_m = vec2(0,0);
+	float radius_m, petalOutsideRadius_m, petalInsideRadius_m;
+	Color color_m;
+	float alpha = 1.f;
+};
+
+Petal::Petal(float petalAngle, float radius, float petalOutsideRadius, float petalInsideRadius, Color color) :
+	petalAngle_m(petalAngle), radius_m(radius), petalOutsideRadius_m(petalOutsideRadius), petalInsideRadius_m(petalInsideRadius), color_m(color)
+{
+	angle1_m = petalAngle + M_PI / 2 + M_PI;
+	angle2_m = petalAngle + M_PI / 2;
+	direction_m.x = cos((angle1_m + angle2_m) / 2.f);
+	direction_m.y = sin((angle1_m + angle2_m) / 2.f);
+}
+
+Petal::~Petal()
+{
+}
+void Petal::draw(cairo::Context &ctx,vec2& orgLoc)
+{
+	ctx.newSubPath();
+	if (isDestroyed_m)
+	{
+		outsideCircleCenter_m -= direction_m;
+		insideCircleCenter_m -= direction_m;
+	}
+	else
+	{
+		outsideCircleCenter_m = orgLoc + vec2(1, 0) * (float)cos(petalAngle_m) * radius_m + vec2(0, 1) * (float)sin(petalAngle_m) * radius_m;
+		insideCircleCenter_m = orgLoc + vec2(1, 0) * (float)cos(petalAngle_m) * petalInsideRadius_m + vec2(0, 1) * (float)sin(petalAngle_m) * petalInsideRadius_m;
+	}
+	ctx.arc(outsideCircleCenter_m, petalOutsideRadius_m, angle1_m, angle2_m);
+	ctx.arc(insideCircleCenter_m, petalInsideRadius_m, angle2_m, angle1_m);
+	ctx.closePath();
+}
 class Flower
 {
 public:
-	Flower(int x, float radius, float petalOutsideRadius, float petalInsideRadius, int numPetals, ColorA color)
-		: xpos(x), mRadius(radius), mPetalOutsideRadius(petalOutsideRadius), mPetalInsideRadius(petalInsideRadius), mNumPetals(numPetals), mColor(color)
-	{}
+	Flower(int x, float radius, float petalOutsideRadius, float petalInsideRadius, int numPetals, ColorA color) //: orginalXPos_m(x)
+		: orginalXPos_m(x),  color_m(color)
+	{
+		petals_m.reserve(numPetals - 1);
+		for (size_t i = 0; i < numPetals; i++)
+		{
+			float petalAngle = (i / (float)numPetals) * 2 * M_PI;
+			petals_m.emplace_back(make_unique<Petal>(petalAngle, radius, petalOutsideRadius, petalInsideRadius, color));
+		}
+	}
 	~Flower();
 
 public:
-	double xpos;
-	double ypos = getWindowHeight() - 229;
-	double r;
-	double a1;
-	double a2;
+	std::vector<unique_ptr<Petal>> petals_m;
+	double orginalXPos_m;
+	double ypos_m = getWindowHeight() - 229;
 	//float xoffest = 0.00001f;
-	float xoffest = 0.1f;
+	float xoffest_m = 0.1f;
 	bool isVisible_m = true;
 	OpenSimplexNoise simplexNoise_m;
-	float displacment = 0;
-	float		mRadius, mPetalOutsideRadius, mPetalInsideRadius;
-	int			mNumPetals;
-	ColorA		mColor;
+	float displacment_m = 0;
+	ColorA		color_m;
+	void destroy()
+	{
+		for (auto& petal : petals_m)
+			petal->isDestroyed_m = true;
+	}
 	void makePath(cairo::Context &ctx, vec2 mLoc) const
 	{
-		for (int petal = 0; petal < mNumPetals; ++petal) {
-			ctx.newSubPath();
-			float petalAngle = (petal / (float)mNumPetals) * 2 * M_PI;
-			vec2 outsideCircleCenter = mLoc + vec2(1, 0) * (float)cos(petalAngle) * mRadius + vec2(0, 1) * (float)sin(petalAngle) * mRadius;
-			vec2 insideCircleCenter = mLoc + vec2(1, 0) * (float)cos(petalAngle) * mPetalInsideRadius + vec2(0, 1) * (float)sin(petalAngle) * mPetalInsideRadius;
-			ctx.arc(outsideCircleCenter, mPetalOutsideRadius, petalAngle + M_PI / 2 + M_PI, petalAngle + M_PI / 2);
-			ctx.arc(insideCircleCenter, mPetalInsideRadius, petalAngle + M_PI / 2, petalAngle + M_PI / 2 + M_PI);
-			ctx.closePath();
-		}
+		for (auto& petal : petals_m)
+			petal->draw(ctx, mLoc);
 	}
 
 	void draw(cairo::Context &ctx)
 	{
-		if (ypos < -30.0)
+		if (ypos_m < -30.0)
 		{
 			isVisible_m = false;
 			return;
 		}
 		float x, xm = 0;
 
-		x = simplexNoise_m.Evaluate(xpos, xoffest);
+		x = simplexNoise_m.Evaluate(orginalXPos_m, xoffest_m);
 		{
 			xm = lmap<float>(x, -1.f, 1.f, 0, getWindowWidth());
 			//float xm = lmap<float>(x, -1.f, 1.f, 0, circle->xpos*1.5f);
 			//xm = lmap<float>(x, -1.f, 1.f, -10.0f, -20.0f);
-			xoffest += 0.001f;
+			xoffest_m += 0.001f;
 		}
-		if (ypos == getWindowHeight() - 229)
+		if (ypos_m == getWindowHeight() - 229)
 		{
-			displacment = xpos - xm;
+			displacment_m = orginalXPos_m - xm;
 		}
-		vec2 mLoc = vec2(xm + displacment, ypos--);
+		vec2 loc = vec2(xm + displacment_m, ypos_m--);
 
 		// draw the solid petals
-		ctx.setSource(mColor);
-		makePath(ctx, mLoc);
+		ctx.setSource(color_m);
+		makePath(ctx, loc);
 		ctx.fill();
 
 		// draw the petal outlines
-		ctx.setSource(mColor * 0.8f);
-		makePath(ctx, mLoc);
+		ctx.setSource(color_m * 0.8f);
+		makePath(ctx, loc);
 		ctx.stroke();
 	};
 };
@@ -140,7 +190,12 @@ void FurEliseVisualisationApp::setup()
 	piano_m = gl::Texture::create(loadImage(loadAsset("piano.png")));
 
 	populateKeyPos();
+	float outerRadius = (2 * M_PI * 20) / 3 / 2 * randFloat(0.9f, 1.0f);
+	float innerRadius = outerRadius * randFloat(0.2f, 0.4f);
+	circles_m.emplace_back(make_unique<Flower>(200, 20, outerRadius, innerRadius, 2, ColorA(CM_HSV, randFloat(), 1, 1, 0.65f)));
 
+
+	return;
 	mInput.listPorts();
 	console() << "NUMBER OF PORTS: " << mInput.getNumPorts() << endl;
 
@@ -162,10 +217,10 @@ void FurEliseVisualisationApp::setup()
 
 void FurEliseVisualisationApp::mouseDown( MouseEvent event )
 {
-	//if (event.isRight())
-		//destoryFlower();
-	//else
-	//{
+	if (event.isRight())
+		destoryFlower();
+	else
+	{
 	float radius = randFloat(10, 35);
 	int numPetals = randInt(5, 20);
 	float outerRadius = (2 * M_PI * radius) / numPetals / 2 * randFloat(0.9f, 1.0f);
@@ -173,7 +228,7 @@ void FurEliseVisualisationApp::mouseDown( MouseEvent event )
 	//mFlowers.push_back(Flower));
 	circles_m.emplace_back(make_unique<Flower>(event.getX(), radius, outerRadius, innerRadius, numPetals, ColorA(CM_HSV, randFloat(), 1, 1, 0.65f)));
 	//	console() << event.getX() << endl;
-	//}
+	}
 }
 
 void FurEliseVisualisationApp::update()
@@ -259,7 +314,8 @@ void FurEliseVisualisationApp::destoryFlower()
 		return;
 
 	int index = randInt(0, circles_m.size());
-	circles_m.erase(circles_m.begin() + index);
+	circles_m.at(index)->destroy();
+	//circles_m.erase(circles_m.begin() + index);
 
 }
 
