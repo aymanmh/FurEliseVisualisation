@@ -26,7 +26,8 @@ class Petal
 public:
 	Petal(float petalAngle, float radius_m, float petalOutsideRadius_m, float petalInsideRadius_m, Color color);
 	~Petal();
-	void draw(cairo::Context& ctx, vec2& orgLoc);
+	void draw(cairo::Context& ctx);
+	void update(OpenSimplexNoise& simplexNoise_m, vec2& orgLoc);
 	bool isDestroyed_m = false;
 private:
 	float petalAngle_m;
@@ -37,7 +38,8 @@ private:
 	vec2 direction_m = vec2(0,0);
 	float radius_m, petalOutsideRadius_m, petalInsideRadius_m;
 	Color color_m;
-	float alpha = 1.f;
+	float xoffest = 0.001f;
+	float xdis_m = 0.f;
 };
 
 Petal::Petal(float petalAngle, float radius, float petalOutsideRadius, float petalInsideRadius, Color color) :
@@ -45,6 +47,8 @@ Petal::Petal(float petalAngle, float radius, float petalOutsideRadius, float pet
 {
 	angle1_m = petalAngle + M_PI / 2 + M_PI;
 	angle2_m = petalAngle + M_PI / 2;
+
+	//find what direction the petal is pointing to, so when its detached, it moves in that direction.
 	direction_m.x = cos((angle1_m + angle2_m) / 2.f);
 	direction_m.y = sin((angle1_m + angle2_m) / 2.f);
 }
@@ -52,19 +56,37 @@ Petal::Petal(float petalAngle, float radius, float petalOutsideRadius, float pet
 Petal::~Petal()
 {
 }
-void Petal::draw(cairo::Context &ctx,vec2& orgLoc)
+
+void Petal::update(OpenSimplexNoise& simplexNoise, vec2 & orgLoc)
 {
-	ctx.newSubPath();
 	if (isDestroyed_m)
 	{
+		//float x = simplexNoise.Evaluate(orgLoc.x, xoffest);
+		//float xm = lmap<float>(x, -1.f, 1.f, 0, getWindowWidth());
+		////float ym = lmap<float>(y, -1.f, 1.f, 0, getWindowHeight());
+		//if (xdis_m == 0)
+		//{
+		//	xdis_m = orgLoc.x - xm;
+		//	//	ydis = orgpos.y - ym;
+		//}
+		////console() << x <<"---" << y << endl;
+		//outsideCircleCenter_m.x = xm + xdis_m;
 		outsideCircleCenter_m -= direction_m;
 		insideCircleCenter_m -= direction_m;
+
+		xoffest += 0.0009f;
 	}
 	else
 	{
 		outsideCircleCenter_m = orgLoc + vec2(1, 0) * (float)cos(petalAngle_m) * radius_m + vec2(0, 1) * (float)sin(petalAngle_m) * radius_m;
 		insideCircleCenter_m = orgLoc + vec2(1, 0) * (float)cos(petalAngle_m) * petalInsideRadius_m + vec2(0, 1) * (float)sin(petalAngle_m) * petalInsideRadius_m;
 	}
+}
+
+void Petal::draw(cairo::Context &ctx)
+{
+	ctx.newSubPath();	
+
 	ctx.arc(outsideCircleCenter_m, petalOutsideRadius_m, angle1_m, angle2_m);
 	ctx.arc(insideCircleCenter_m, petalInsideRadius_m, angle2_m, angle1_m);
 	ctx.closePath();
@@ -75,6 +97,8 @@ public:
 	Flower(int x, float radius, float petalOutsideRadius, float petalInsideRadius, int numPetals, ColorA color) //: orginalXPos_m(x)
 		: orginalXPos_m(x),  color_m(color)
 	{
+		disappearanceRate = randFloat(.01f, 0.05f);
+
 		petals_m.reserve(numPetals - 1);
 		for (size_t i = 0; i < numPetals; i++)
 		{
@@ -94,59 +118,67 @@ public:
 	OpenSimplexNoise simplexNoise_m;
 	float displacment_m = 0;
 	ColorA		color_m;
+
+	float alpha_m = 1.f;
+	float disappearanceRate;
+	bool isDestroyed_m = false;
 	void destroy()
 	{
+		isDestroyed_m = true;
 		for (auto& petal : petals_m)
 			petal->isDestroyed_m = true;
-	}
-	void makePath(cairo::Context &ctx, vec2 mLoc) const
-	{
-		for (auto& petal : petals_m)
-			petal->draw(ctx, mLoc);
+
 	}
 
 	void draw(cairo::Context &ctx)
 	{
-		if (ypos_m < -30.0)
+		if (ypos_m < -30.0 || alpha_m <= 0.0f)
+
 		{
 			isVisible_m = false;
 			return;
 		}
-		float x, xm = 0;
 
-		x = simplexNoise_m.Evaluate(orginalXPos_m, xoffest_m);
+		vec2 loc;
+		if (isDestroyed_m)
 		{
-			xm = lmap<float>(x, -1.f, 1.f, 0, getWindowWidth());
-			//float xm = lmap<float>(x, -1.f, 1.f, 0, circle->xpos*1.5f);
-			//xm = lmap<float>(x, -1.f, 1.f, -10.0f, -20.0f);
-			xoffest_m += 0.001f;
+			alpha_m -= disappearanceRate;
 		}
-		if (ypos_m == getWindowHeight() - 229)
+		else
 		{
-			displacment_m = orginalXPos_m - xm;
-		}
-		vec2 loc = vec2(xm + displacment_m, ypos_m--);
+			float x, xm = 0;
 
-		// draw the solid petals
-		ctx.setSource(color_m);
-		makePath(ctx, loc);
-		ctx.fill();
+			x = simplexNoise_m.Evaluate(orginalXPos_m, xoffest_m);
+			{
+				xm = lmap<float>(x, -1.f, 1.f, 0, getWindowWidth());
+				//float xm = lmap<float>(x, -1.f, 1.f, 0, circle->xpos*1.5f);
+				//xm = lmap<float>(x, -1.f, 1.f, -10.0f, -20.0f);
+				xoffest_m += 0.001f;
+			}
+			if (ypos_m == getWindowHeight() - 229)
+			{
+				displacment_m = orginalXPos_m - xm;
+			}
+			loc = vec2(xm + displacment_m, ypos_m--);
+		}						
+		
+		for (auto& petal : petals_m)
+		{
+			// update the petals location
+			petal->update(simplexNoise_m, loc);
 
-		// draw the petal outlines
-		ctx.setSource(color_m * 0.8f);
-		makePath(ctx, loc);
-		ctx.stroke();
+			// draw the solid petals
+			ctx.setSource(ColorAf(color_m,alpha_m));
+			petal->draw(ctx);
+			ctx.fill();
+
+			// draw the petal outlines
+			ctx.setSource(ColorAf(color_m * 0.8f, alpha_m));
+			petal->draw(ctx);
+			ctx.stroke();
+		}		
 	};
 };
-
-//Flower::Flower(double x)
-//{
-//	xpos = x;
-//	r = 20.0;
-//	a1 = 0.0;
-//	a2 = 2 * M_PI;
-//	
-//}
 
 Flower::~Flower()
 {
@@ -167,7 +199,7 @@ class FurEliseVisualisationApp : public App {
 	OpenSimplexNoise simplexNoise_m;
 	std::unique_ptr<cairo::SurfaceImage> cairoSurface_m;
 	gl::Texture2dRef piano_m;
-	std::vector<unique_ptr<Flower>> circles_m;
+	std::vector<unique_ptr<Flower>> flowers_m;
 	void destoryFlower();
 	int middleCPos_m = 622;
 	int keyDisplacement = 14;
@@ -190,12 +222,14 @@ void FurEliseVisualisationApp::setup()
 	piano_m = gl::Texture::create(loadImage(loadAsset("piano.png")));
 
 	populateKeyPos();
-	float outerRadius = (2 * M_PI * 20) / 3 / 2 * randFloat(0.9f, 1.0f);
+
+	/*float outerRadius = (2 * M_PI * 20) / 3 / 2 * randFloat(0.9f, 1.0f);
 	float innerRadius = outerRadius * randFloat(0.2f, 0.4f);
-	circles_m.emplace_back(make_unique<Flower>(200, 20, outerRadius, innerRadius, 2, ColorA(CM_HSV, randFloat(), 1, 1, 0.65f)));
+	flowers_m.emplace_back(make_unique<Flower>(200, 20, outerRadius, innerRadius, 2, ColorA(CM_HSV, randFloat(), 1, 1, 0.65f)));
 
 
-	return;
+	return;*/
+
 	mInput.listPorts();
 	console() << "NUMBER OF PORTS: " << mInput.getNumPorts() << endl;
 
@@ -226,7 +260,7 @@ void FurEliseVisualisationApp::mouseDown( MouseEvent event )
 	float outerRadius = (2 * M_PI * radius) / numPetals / 2 * randFloat(0.9f, 1.0f);
 	float innerRadius = outerRadius * randFloat(0.2f, 0.4f);
 	//mFlowers.push_back(Flower));
-	circles_m.emplace_back(make_unique<Flower>(event.getX(), radius, outerRadius, innerRadius, numPetals, ColorA(CM_HSV, randFloat(), 1, 1, 0.65f)));
+	flowers_m.emplace_back(make_unique<Flower>(event.getX(), radius, outerRadius, innerRadius, numPetals, ColorA(CM_HSV, randFloat(), 1, 1, 0.65f)));
 	//	console() << event.getX() << endl;
 	}
 }
@@ -254,9 +288,9 @@ void FurEliseVisualisationApp::renderScene(cairo::Context &ctx)
 	ctx.setLineJoin(cinder::cairo::LINE_JOIN_BEVEL);//LINE_CAP_ROUND LINE_CAP_BUTT
 
 
-	for (auto& circle : circles_m)
+	for (auto& flower : flowers_m)
 	{
-		circle->draw(ctx);
+		flower->draw(ctx);
 		/*
 		if (circle->ypos < -30.0)
 		{
@@ -292,7 +326,7 @@ void FurEliseVisualisationApp::renderScene(cairo::Context &ctx)
 	}
 
 	//remove invisible flowers
-	circles_m.erase(std::remove_if(circles_m.begin(), circles_m.end(), [](const std::unique_ptr<Flower>& flower) {return flower->isVisible_m == false; }), circles_m.end());
+	flowers_m.erase(std::remove_if(flowers_m.begin(), flowers_m.end(), [](const std::unique_ptr<Flower>& flower) {return flower->isVisible_m == false; }), flowers_m.end());
 
 }
 
@@ -310,11 +344,12 @@ void FurEliseVisualisationApp::draw()
 
 void FurEliseVisualisationApp::destoryFlower()
 {
-	if (circles_m.empty())
+	if (flowers_m.empty())
 		return;
 
-	int index = randInt(0, circles_m.size());
-	circles_m.at(index)->destroy();
+	int index = randInt(0, flowers_m.size());
+	flowers_m.at(index)->destroy();
+
 	//circles_m.erase(circles_m.begin() + index);
 
 }
@@ -330,11 +365,11 @@ void FurEliseVisualisationApp::midiListener(midi::Message msg)
 		if (msg.pitch >= 60)
 		{
 			float radius = randFloat(10, 35);
-			int numPetals = randInt(5, 20);
+			int numPetals = randInt(4, 15);
 			float outerRadius = (2 * M_PI * radius) / numPetals / 2 * randFloat(0.9f, 1.0f);
 			float innerRadius = outerRadius * randFloat(0.2f, 0.4f);
 			//mFlowers.push_back(Flower));
-			circles_m.emplace_back(make_unique<Flower>(keyPos_m[msg.pitch], radius, outerRadius, innerRadius, numPetals, ColorA(CM_HSV, randFloat(), 1, 1, 0.65f)));
+			flowers_m.emplace_back(make_unique<Flower>(keyPos_m[msg.pitch], radius, outerRadius, innerRadius, numPetals, ColorA(CM_HSV, randFloat(), 1, 1, 0.65f)));
 			//circles_m.emplace_back(make_unique<Flower>(keyPos_m[msg.pitch]));
 		}
 		else
@@ -351,64 +386,64 @@ void FurEliseVisualisationApp::populateKeyPos()
 	//unsigned char lowestKey = 0x2d;
 	int lowestKey = 33;
 
-		keyPos_m[lowestKey++] = 30;
-		keyPos_m[lowestKey++] = 53;
-		keyPos_m[lowestKey++] = 75;
-		keyPos_m[lowestKey++] = 96;
-		keyPos_m[lowestKey++] = 117;
-		keyPos_m[lowestKey++] = 138;
-		keyPos_m[lowestKey++] = 159;
-		keyPos_m[lowestKey++] = 185;
-		keyPos_m[lowestKey++] = 204;
-		keyPos_m[lowestKey++] = 224;
-		keyPos_m[lowestKey++] = 246;
-		keyPos_m[lowestKey++] = 268;
-		keyPos_m[lowestKey++] = 290;
-		keyPos_m[lowestKey++] = 310;
-		keyPos_m[lowestKey++] = 331;
-		keyPos_m[lowestKey++] = 355;
-		keyPos_m[lowestKey++] = 374;
-		keyPos_m[lowestKey++] = 398;
-		keyPos_m[lowestKey++] = 417;
-		keyPos_m[lowestKey++] = 437;
-		keyPos_m[lowestKey++] = 463;
-		keyPos_m[lowestKey++] = 481;
-		keyPos_m[lowestKey++] = 502;
-		keyPos_m[lowestKey++] = 525;
-		keyPos_m[lowestKey++] = 547;
-		keyPos_m[lowestKey++] = 564;
-		keyPos_m[lowestKey++] = 586;
-		keyPos_m[lowestKey++] = 607;
-		keyPos_m[lowestKey++] = 631;
-		keyPos_m[lowestKey++] = 652;
-		keyPos_m[lowestKey++] = 674;
-		keyPos_m[lowestKey++] = 692;
-		keyPos_m[lowestKey++] = 715;
-		keyPos_m[lowestKey++] = 736;
-		keyPos_m[lowestKey++] = 758;
-		keyPos_m[lowestKey++] = 778;
-		keyPos_m[lowestKey++] = 797;
-		keyPos_m[lowestKey++] = 819;
-		keyPos_m[lowestKey++] = 839;
-		keyPos_m[lowestKey++] = 861;
-		keyPos_m[lowestKey++] = 883;
-		keyPos_m[lowestKey++] = 903;
-		keyPos_m[lowestKey++] = 928;
-		keyPos_m[lowestKey++] = 945;
-		keyPos_m[lowestKey++] = 970;
-		keyPos_m[lowestKey++] = 991;
-		keyPos_m[lowestKey++] = 1010;
-		keyPos_m[lowestKey++] = 1032;
-		keyPos_m[lowestKey++] = 1052;
-		keyPos_m[lowestKey++] = 1073;
-		keyPos_m[lowestKey++] = 1094;
-		keyPos_m[lowestKey++] = 1114;
-		keyPos_m[lowestKey++] = 1137;
-		keyPos_m[lowestKey++] = 1158;
-		keyPos_m[lowestKey++] = 1182;
-		keyPos_m[lowestKey++] = 1199;
-		keyPos_m[lowestKey++] = 1218;
-		keyPos_m[lowestKey++] = 1241;
+	keyPos_m[lowestKey++] = 30;
+	keyPos_m[lowestKey++] = 53;
+	keyPos_m[lowestKey++] = 75;
+	keyPos_m[lowestKey++] = 96;
+	keyPos_m[lowestKey++] = 117;
+	keyPos_m[lowestKey++] = 138;
+	keyPos_m[lowestKey++] = 159;
+	keyPos_m[lowestKey++] = 185;
+	keyPos_m[lowestKey++] = 204;
+	keyPos_m[lowestKey++] = 224;
+	keyPos_m[lowestKey++] = 246;
+	keyPos_m[lowestKey++] = 268;
+	keyPos_m[lowestKey++] = 290;
+	keyPos_m[lowestKey++] = 310;
+	keyPos_m[lowestKey++] = 331;
+	keyPos_m[lowestKey++] = 355;
+	keyPos_m[lowestKey++] = 374;
+	keyPos_m[lowestKey++] = 398;
+	keyPos_m[lowestKey++] = 417;
+	keyPos_m[lowestKey++] = 437;
+	keyPos_m[lowestKey++] = 463;
+	keyPos_m[lowestKey++] = 481;
+	keyPos_m[lowestKey++] = 502;
+	keyPos_m[lowestKey++] = 525;
+	keyPos_m[lowestKey++] = 547;
+	keyPos_m[lowestKey++] = 564;
+	keyPos_m[lowestKey++] = 586;
+	keyPos_m[lowestKey++] = 607;
+	keyPos_m[lowestKey++] = 631;
+	keyPos_m[lowestKey++] = 652;
+	keyPos_m[lowestKey++] = 674;
+	keyPos_m[lowestKey++] = 692;
+	keyPos_m[lowestKey++] = 715;
+	keyPos_m[lowestKey++] = 736;
+	keyPos_m[lowestKey++] = 758;
+	keyPos_m[lowestKey++] = 778;
+	keyPos_m[lowestKey++] = 797;
+	keyPos_m[lowestKey++] = 819;
+	keyPos_m[lowestKey++] = 839;
+	keyPos_m[lowestKey++] = 861;
+	keyPos_m[lowestKey++] = 883;
+	keyPos_m[lowestKey++] = 903;
+	keyPos_m[lowestKey++] = 928;
+	keyPos_m[lowestKey++] = 945;
+	keyPos_m[lowestKey++] = 970;
+	keyPos_m[lowestKey++] = 991;
+	keyPos_m[lowestKey++] = 1010;
+	keyPos_m[lowestKey++] = 1032;
+	keyPos_m[lowestKey++] = 1052;
+	keyPos_m[lowestKey++] = 1073;
+	keyPos_m[lowestKey++] = 1094;
+	keyPos_m[lowestKey++] = 1114;
+	keyPos_m[lowestKey++] = 1137;
+	keyPos_m[lowestKey++] = 1158;
+	keyPos_m[lowestKey++] = 1182;
+	keyPos_m[lowestKey++] = 1199;
+	keyPos_m[lowestKey++] = 1218;
+	keyPos_m[lowestKey++] = 1241;
 }
 
 CINDER_APP( FurEliseVisualisationApp, RendererGl)
