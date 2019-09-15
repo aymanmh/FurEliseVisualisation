@@ -74,6 +74,7 @@
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention />
       <IgnoreSpecificDefaultLibraries>LIBCMT;LIBCPMT</IgnoreSpecificDefaultLibraries>
+      <AdditionalOptions>/FORCE:MULTIPLE %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -102,6 +103,7 @@
       <EnableCOMDATFolding />
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention />
+      <AdditionalOptions>/FORCE:MULTIPLE %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -115,6 +117,7 @@
     <ClCompile Include="..\..\..\cinder_0.9.1_vc2013\blocks\Cinder-MIDI2\src\MidiIn.cpp" />
     <ClCompile Include="..\..\..\cinder_0.9.1_vc2013\blocks\Cinder-MIDI2\src\MidiMessage.cpp" />
     <ClCompile Include="..\..\..\cinder_0.9.1_vc2013\blocks\Cinder-MIDI2\src\MidiOut.cpp" />
+    <ClCompile Include="..\src\Flower.cpp" />
     <ClCompile Include="..\src\FurEliseVisualisationApp.cpp" />
     <ClCompile Include="..\..\..\cinder_0.9.1_vc2013\blocks\Cairo\src\Cairo.cpp" />
   </ItemGroup>
@@ -127,6 +130,7 @@
     <ClInclude Include="..\..\..\cinder_0.9.1_vc2013\blocks\Cinder-MIDI2\include\MidiMessage.h" />
     <ClInclude Include="..\..\..\cinder_0.9.1_vc2013\blocks\Cinder-MIDI2\include\MidiOut.h" />
     <ClInclude Include="..\..\..\cinder_0.9.1_vc2013\blocks\Cinder-MIDI2\lib\RtMidi.h" />
+    <ClInclude Include="..\include\Flower.h" />
     <ClInclude Include="..\include\opensimplexnois.h" />
     <ClInclude Include="..\include\Resources.h" />
     <ClInclude Include="..\..\..\cinder_0.9.1_vc2013\blocks\Cairo\include\cinder\cairo\Cairo.h" />

@@ -47,9 +47,6 @@
     <ClCompile Include="..\src\CairoProjectApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\CairoProjectApp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClInclude Include="..\include\Resources.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -73,6 +70,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\cinder_0.9.1_vc2013\blocks\Cinder-MIDI2\src\MidiOut.cpp">
       <Filter>Blocks\Midi\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\FurEliseVisualisationApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Flower.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -105,6 +108,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\cinder_0.9.1_vc2013\blocks\Cinder-MIDI2\lib\RtMidi.h">
       <Filter>Blocks\Midi\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Flower.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
